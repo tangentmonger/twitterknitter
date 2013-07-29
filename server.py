@@ -5,7 +5,7 @@ from PIL import ImageDraw
 import serial
 import urllib
 import json
-import oauth
+import oauth #that's OAuth by  Jon Hurlock:  https://github.com/jonhurlock/Twitter-Application-Only-Authentication-OAuth-Python/blob/master/oauth.py
 
 
 
