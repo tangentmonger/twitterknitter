@@ -5,13 +5,13 @@ import knitter24
 class TestKnitter(unittest.TestCase):
 
     @mock.patch('serial.Serial')
-    def testInitialiseSerial(self, mock_serial):
+    def test_initialise_serial(self, mock_serial):
         knitter = knitter24.Knitter24()
         mock_serial.assert_called_once_with('/dev/ttyUSB0', 9600)
 
     #i.e. mock entire class Serial, which is why we don't need to import it
     @mock.patch('serial.Serial') #the entire class
-    def testSendsPattern(self, mock_serial):
+    def test_sends_pattern(self, mock_serial):
         knitter = knitter24.Knitter24()
         knitter.send_pattern([( 1,0,0,0,0,0,0,1,
                                 0,0,0,0,0,1,1,0,
