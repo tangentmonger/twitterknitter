@@ -6,8 +6,8 @@ import serial
 class Knitter24:
     """Knitting machine (v1, 24 stitch patterns)"""
     
-    def __init__(self):
-        self.serial = serial.Serial('/dev/ttyUSB0', 9600) #or whatever
+    def __init__(self, usb='/dev/ttyUSB0', baud=9600):
+        self.serial = serial.Serial(usb, baud)
 
     def send_pattern(self, pattern):
         """Given a pattern as a list of 24-tuples, send it out over serial"""
@@ -25,8 +25,6 @@ class Knitter24:
     def pack_row(cls, row):
         """Given a 24-value tuple, convert it to a tuple of three bytes"""
         #assumption: tuple was 24 items long and contained only '0' and '1'
-        #binary_pattern = map(self.binify, row)
-        #binary_pattern = [self.binify(x) for x in row]
         binary_pattern = [str(x) for x in row]
         row_string = ''.join(binary_pattern)
         return (int(row_string[0:8], 2), 
