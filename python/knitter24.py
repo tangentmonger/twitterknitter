@@ -13,14 +13,11 @@ class Knitter24:
     def send_pattern(self, pattern):
         """Given a Pattern24 send it out over serial"""
         #write number of rows
-        self.serial.write(chr(len(pattern.get_pattern())))
-
+        self.serial.write([len(pattern.get_pattern())])
         for row in pattern.get_pattern():
             # we want to output LSB first
             byte3, byte2, byte1 = self.pack_row(row) 
-            self.serial.write(chr(byte1))
-            self.serial.write(chr(byte2))
-            self.serial.write(chr(byte3))
+            self.serial.write([byte1, byte2, byte3])
 
     @classmethod
     def pack_row(cls, row):

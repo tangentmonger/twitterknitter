@@ -18,7 +18,7 @@ class TestKnitter(unittest.TestCase):
         knitter.send_pattern(pattern)
 
         #LSB first
-        calls = [mock.call(chr(1)), mock.call(chr(8)), mock.call(chr(6)), mock.call(chr(129))]
+        calls = [mock.call([1]), mock.call([8, 6, 129])]
         mock_serial.return_value.write.assert_has_calls(calls)
 
 if __name__ == "__main__":
