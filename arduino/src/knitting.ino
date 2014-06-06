@@ -27,9 +27,6 @@ const int BUTTON = 50;
 bool currentServos[NSERVOS];
 bool nextServos[NSERVOS];
 
-typedef enum {SETUP, WAITING_FOR_DATA, SETTING_PATTERN, KNITTING} fsm_state;
-fsm_state state = SETUP;
-
 const int upLocations[] = {30, 155, 30, 155, 30, 155, 30, 155, 30, 155, 30, 155, 155, 30, 155, 30, 155, 30, 155, 30, 155, 30, 155, 30};
 const int downLocations[] = {100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100 };
 
