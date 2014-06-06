@@ -7,6 +7,12 @@
 //Knitting LED on digital 3
 //Carriage sense on digital 4
 
+//Lights:
+//Red: no data
+//Amber: data, moving servos
+//Green: knit
+
+
 #include <Servo.h>
 
 const int NSERVOS = 24;
@@ -18,172 +24,106 @@ const int YELLOWLED = 52;
 const int GREENLED = 51;
 const int BUTTON = 50;
 
-int nRows = 0;
-byte * pattern;
-
 bool currentServos[NSERVOS];
 bool nextServos[NSERVOS];
 
+typedef enum {SETUP, WAITING_FOR_DATA, SETTING_PATTERN, KNITTING} fsm_state;
+fsm_state state = SETUP;
 
 const int upLocations[] = {30, 155, 30, 155, 30, 155, 30, 155, 30, 155, 30, 155, 155, 30, 155, 30, 155, 30, 155, 30, 155, 30, 155, 30};
 const int downLocations[] = {100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100 };
 
 
 void setup() {
-
-
-    for( int i =0; i < NSERVOS; i++) {
-        Servos[i].attach(FIRST_SERVO_PIN + i);
-        Servos[i].write(downLocations[i]);
-        currentServos[i] = false;
-        nextServos[i] = false;
-        delay(200);
-    }
-
-
-    pinMode(REDLED, OUTPUT); //waiting
-    pinMode(YELLOWLED, OUTPUT); //data
-    pinMode(GREENLED, OUTPUT); //knitting
+    pinMode(REDLED, OUTPUT); //waiting for data
+    pinMode(YELLOWLED, OUTPUT); //got data, setting pattern
+    pinMode(GREENLED, OUTPUT); //ok to knit
     pinMode(BUTTON, INPUT); //carriage sense
-    pinMode(13, OUTPUT); //arduino LED      
-
-    digitalWrite(2, LOW);
-    digitalWrite(3, LOW);
-}
-
-void react() {
-    for(int i=0;i<1;i++){
-        Servos[1].write(155);
-        delay(200);
-        Servos[1].write(100);
-        delay(200);
+    
+    Serial.begin(9600); 
+  
+    for(int i=0; i<NSERVOS; i++) {
+        Servos[i].attach(FIRST_SERVO_PIN + i);
     }
-}
+    
+    byte* pattern = (byte*) malloc(sizeof(byte) * 3);
+    
+    pattern[0] = 0x00;
+    pattern[1] = 0x00;
+    pattern[2] = 0x00;
+    setPattern(pattern);
+ 
+    pattern[0] = 0xFF;
+    pattern[1] = 0xFF;
+    pattern[2] = 0xFF;
+    setPattern(pattern);
 
-
+    free(pattern);
+    
+  }
 
 void loop() {
     while(true) {
-        getPattern();
+        byte* pattern = (byte*) malloc(sizeof(byte) * 3);
+        getData(pattern);
+        setPattern(pattern);
         doKnitting();
+        free(pattern);
     }
 
-
-
-    /*    while(true) {
-          testServos();
-          }
-     */
-
+    /*
+    while(true) {
+        testServos();
+    }
+    */
 }
 
-//test pattern: alternating stripes in blocks of two
-void testServos() {
+void getData(byte* pattern) {
     digitalWrite(REDLED, HIGH);
+    digitalWrite(YELLOWLED, LOW);
+    digitalWrite(GREENLED, LOW);
 
-    delay(500);
-    for(int i=0; i<NSERVOS; i++) {
-        setServo(i, true);
-    }
-    moveServos();
-    digitalWrite(REDLED, LOW);
+    //get pattern
+    while(Serial.available() < 3) {}
+    Serial.readBytes((char*)pattern, 3); //readBytes doesn't take byte* ???
 
-    while(digitalRead(BUTTON) ==0) {}
-    delay(500);
-    while(digitalRead(BUTTON) == 0) {}
-
-
-    digitalWrite(REDLED, HIGH);
-    delay(500);
-    for(int i=0; i<NSERVOS; i++) {
-        setServo(i, false);
-    }
-    moveServos();
-    digitalWrite(REDLED, LOW);
-
-    while(digitalRead(BUTTON) ==0) {}
-    delay(500);
-    while(digitalRead(BUTTON) == 0) {}
-
-
+    //ack
+    Serial.print((byte)0);
 }
 
-void getPattern() {
-    //light on  
-    digitalWrite(REDLED, HIGH);
-    digitalWrite(13, HIGH);
-
-
-
-    //connect serial
-    Serial.begin(9600); 
-
-    while(Serial.available() == 0) {
-        delay(100);
-    }
-
+void setPattern(byte* pattern) {
     digitalWrite(REDLED, LOW);
     digitalWrite(YELLOWLED, HIGH);
-    //read length of pattern, in rows
-
-    nRows = Serial.read();
-    //prepare buffer
-    pattern = (byte*) malloc(sizeof(byte) * nRows * 3);
-
-    Serial.readBytes((char*)pattern, nRows * 3); //readBytes doesn't take byte* ???
-
-    //light off
-    digitalWrite(YELLOWLED, LOW);
-    digitalWrite(13, LOW);
-
-    Serial.end();
-
+    digitalWrite(GREENLED, LOW);
+    
+    for(int group=0; group<3; group++) {
+        for(int bit=0; bit<8; bit++) {
+            setServo((group*8) + bit, bool(pattern[group] & (1 << bit)));
+        }
+    }
+    
+    moveServos();
 }
-
 
 void doKnitting() {
-    //light on
+    digitalWrite(REDLED, LOW);
+    digitalWrite(YELLOWLED, LOW);
     digitalWrite(GREENLED, HIGH);
 
-    int get =0;
-    for(int i=0; i<nRows; i++) {
-        if(i % 10 == 0) {
-            digitalWrite(YELLOWLED,HIGH);
-        } else {
-            digitalWrite(YELLOWLED,LOW);
-        }
-        digitalWrite(REDLED, HIGH);
+    //wait for carriage
+    while(digitalRead(BUTTON) == 0) {}
 
-        //assumption: servo 0 is on the right
-        //unpack and set servos for row
-        //LSByte first
-        for(int group=0; group<3; group++) {
-            for(int bit=0; bit<8; bit++) {
-                setServo((group*8) + bit, bool(pattern[get] & (1 << bit)));
-            }
-            get++;
-        }
-        moveServos();
-
-        digitalWrite(REDLED, LOW);
-        //wait for carriage
-        while(digitalRead(BUTTON) == 0) {}
-
-        //debounce
-        delay(500);
-    }
-
-    //tidy up
-    free(pattern);
-    digitalWrite(GREENLED, LOW);
+    //debounce
+    delay(500);
 }
+
+
 
 void setServo(int servo, bool up) {
     //record the next setting for this servo
     nextServos[servo] = up;
 }
 
-//actually do the move as efficiently as possible
 void moveServos() {
     //make list of servos that need moving
     int toMove[NSERVOS];
@@ -198,7 +138,8 @@ void moveServos() {
         }
     }
 
-    int numberAtOnce = 3;
+    //actually do the move as efficiently as possible
+    int numberAtOnce = 3; //more at once = more current draw
     int count = 0;
     for(int i=0; i<numberToMove; i++) {
         if(nextServos[toMove[i]]) {
@@ -212,5 +153,27 @@ void moveServos() {
             delay(100);
         }
     }
+}
 
+//test pattern: alternating stripes in blocks of two
+void testServos() {
+    byte* pattern = (byte*) malloc(sizeof(byte) * 3);
+    
+    pattern[0] = 0x00;
+    pattern[1] = 0x00;
+    pattern[2] = 0x00;
+    
+    setPattern(pattern);
+    doKnitting();
+    doKnitting();
+ 
+    pattern[0] = 0xFF;
+    pattern[1] = 0xFF;
+    pattern[2] = 0xFF;
+    
+    setPattern(pattern);
+    doKnitting();
+    doKnitting();
+
+    free(pattern);
 }

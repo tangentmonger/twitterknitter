@@ -89,11 +89,11 @@ def create_image_from_text(text):
     except Exception as e:
         print(e)
 
-while(True):
 
-    pattern = Pattern24.from_test_columns()
-    
-    knitter = Knitter24()
-    knitter.send_pattern(pattern)
+pattern = Pattern24.from_test_columns()
+#image = Image.open("/home/coryy/Dropbox/knitsnake/snakepattern.bmp")
+#pattern = Pattern24.from_image(image)
 
-    input("Press any key to continue")
+knitter = Knitter24("/dev/ttyUSB3", 9600)
+knitter.send_pattern(pattern)
+
