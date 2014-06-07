@@ -90,10 +90,11 @@ def create_image_from_text(text):
         print(e)
 
 
-pattern = Pattern24.from_test_columns()
-#image = Image.open("/home/coryy/Dropbox/knitsnake/snakepattern.bmp")
-#pattern = Pattern24.from_image(image)
+#pattern = Pattern24.from_test_columns()
+pattern = Pattern24.from_test_rows()
+#image = Image.open("/home/coryy/Dropbox/knitsnake/snakepattern2.bmp")
+pattern = Pattern24.from_image(image)
 
-knitter = Knitter24("/dev/ttyUSB3", 9600)
+knitter = Knitter24("/dev/ttyUSB0", 9600)
 knitter.send_pattern(pattern)
 

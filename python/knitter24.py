@@ -19,6 +19,7 @@ class Knitter24:
             self.serial.write([byte1, byte2, byte3])
             self.serial.flush()
             self.serial.read(1) #block until KM acks
+            print("ACK")
 
     @classmethod
     def pack_row(cls, row):
@@ -26,7 +27,7 @@ class Knitter24:
         #assumption: tuple was 24 items long and contained only '0' and '1'
         binary_pattern = [str(x) for x in row]
         row_string = ''.join(binary_pattern)
-        print(row_string)
+        print(row_string, end=" ")
         return (int(row_string[0:8], 2), 
                 int(row_string[8:16], 2), 
                 int(row_string[16:24], 2))

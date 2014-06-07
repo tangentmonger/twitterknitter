@@ -37,25 +37,21 @@ void setup() {
     pinMode(GREENLED, OUTPUT); //ok to knit
     pinMode(BUTTON, INPUT); //carriage sense
     
-    Serial.begin(9600); 
-  
+    digitalWrite(REDLED, HIGH);
+    digitalWrite(YELLOWLED, LOW);
+    digitalWrite(GREENLED, LOW);
+
     for(int i=0; i<NSERVOS; i++) {
         Servos[i].attach(FIRST_SERVO_PIN + i);
+        Servos[i].write(downLocations[i]);
+        currentServos[i] = false;
+        nextServos[i] = false;
+        delay(200); 
+        //delay is required, otherwise servos all try to move simultaneously to
+        //random locations and draw too much power
     }
     
-    byte* pattern = (byte*) malloc(sizeof(byte) * 3);
-    
-    pattern[0] = 0x00;
-    pattern[1] = 0x00;
-    pattern[2] = 0x00;
-    setPattern(pattern);
- 
-    pattern[0] = 0xFF;
-    pattern[1] = 0xFF;
-    pattern[2] = 0xFF;
-    setPattern(pattern);
-
-    free(pattern);
+    Serial.begin(9600); 
     
   }
 
@@ -68,11 +64,13 @@ void loop() {
         free(pattern);
     }
 
-    /*
-    while(true) {
+    
+    /*while(true) {
         testServos();
     }
     */
+    
+    
 }
 
 void getData(byte* pattern) {
