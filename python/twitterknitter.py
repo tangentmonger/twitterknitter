@@ -1,3 +1,6 @@
+""" Runs the TwitterKnitter. Prepares images and
+sends them to the Arduino one line at a time. """
+
 from knitter24 import Knitter24
 from pattern24 import Pattern24
 from TwitterSearch import *
@@ -8,6 +11,7 @@ from PIL import ImageDraw
 
 
 def choose_tweet():
+    """Offers a text-based menu of tweet text to knit"""
     tweets = get_tweets()
     chosen = False
     while(not(chosen)):
@@ -16,11 +20,11 @@ def choose_tweet():
             print ("%d: %s" % (idx+1, tweet))
         print("%d: <ENTER TEXT>" % (len(tweets) + 1))
         print
-        nb = input('Choose a tweet: ')
+        selection = input('Choose a tweet: ')
         try:
-            number = int( nb )
+            number = int(selection)
             if(number == 0):
-                tweets = getTweets()
+                tweets = get_tweets()
             elif(0 < number <= len(tweets)):
                 text = tweets[number-1]
                 chosen = True
@@ -34,7 +38,7 @@ def choose_tweet():
     return text
 
 def get_tweets():
-
+    """Fetches up to 10 tweets and returns their text in a list"""
     hashtag = "maker"
 
     sources = []
@@ -45,25 +49,26 @@ def get_tweets():
         tso.setCount(10)
         tso.setIncludeEntities(False)
 
-        ts = TwitterSearch(
+        twitter_search = TwitterSearch(
             consumer_key = Secrets.consumer_key,
             consumer_secret = Secrets.consumer_secret,
             access_token = Secrets.access_token,
             access_token_secret = Secrets.access_token_secret
             )
 
-        tweets = ts.searchTweets(tso)
+        tweets = twitter_search.searchTweets(tso)
 
         for tweet in tweets['content']['statuses']:
             sources.append(tweet['text'])
 
-    except TwitterSearchException as e:
-        print(e)
+    except TwitterSearchException as exception:
+        print(exception)
 
     return sources
 
 
 def create_image_from_text(text):
+    """Creates a 24-pixel wide image featuring the given text"""
     try:
         text = text.encode('ascii', 'ignore')
         #no TTF, they get antialiased!
@@ -74,26 +79,27 @@ def create_image_from_text(text):
         #font = ImageFont.load("term14.pil") #22, ick
 
         width, height = font.getsize(text)
-        borderWidth = 2;
+        border_width = 2
 
-        img=Image.new("1", (borderWidth*2 + width, 24),1) #24 pixels high, length is arbitrary
+        img = Image.new("1", (border_width*2 + width, 24), 1)
+        #24 pixels high, length is arbitrary
         width, height = img.size
         draw = ImageDraw.Draw(img)
         draw.line(((0, 1), (width, 1)), fill=0)
         draw.line(((0, height - 2), (width, height - 2)), fill=0)
-        draw.text((borderWidth, borderWidth),text,0,font=font)
+        draw.text((border_width, border_width), text, 0, font=font)
         draw = ImageDraw.Draw(img)
         img = img.rotate(90)
         img.save("a_test.png")
         return img
-    except Exception as e:
-        print(e)
+    except Exception as exception:
+        print(exception)
 
-
+text = choose_tweet()
 #pattern = Pattern24.from_test_columns()
 pattern = Pattern24.from_test_rows()
 #image = Image.open("/home/coryy/Dropbox/knitsnake/snakepattern2.bmp")
-pattern = Pattern24.from_image(image)
+#pattern = Pattern24.from_image(image)
 
 knitter = Knitter24("/dev/ttyUSB0", 9600)
 knitter.send_pattern(pattern)
