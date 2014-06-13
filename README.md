@@ -3,6 +3,8 @@ twitterknitter
 
 TOG's 70's knitting machine knits tweets.
 
+Travis CI status: ![Travis status] (https://travis-ci.org/tangentmonger/twitterknitter.svg?branch=master "Travis status")
+
 ![The TwitterKnitter](https://raw.githubusercontent.com/tangentmonger/twitterknitter/master/img/contraption.jpg "The TwitterKnitter")
 
 ![Row change microswitch](https://raw.githubusercontent.com/tangentmonger/twitterknitter/master/img/microswitch.jpg "Row change microswitch")
