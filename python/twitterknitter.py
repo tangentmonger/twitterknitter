@@ -95,11 +95,13 @@ def create_image_from_text(text):
     except Exception as exception:
         print(exception)
 
-text = choose_tweet()
+#text = choose_tweet()
+text = input("Enter text: ")
 #pattern = Pattern24.from_test_columns()
-pattern = Pattern24.from_test_rows()
+#pattern = Pattern24.from_test_rows()
 #image = Image.open("/home/coryy/Dropbox/knitsnake/snakepattern2.bmp")
-#pattern = Pattern24.from_image(image)
+image = create_image_from_text(text)
+pattern = Pattern24.from_image(image)
 
 knitter = Knitter24("/dev/ttyUSB0", 9600)
 knitter.send_pattern(pattern)
