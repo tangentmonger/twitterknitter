@@ -1,0 +1,31 @@
+Installing the Python client
+============================
+
+1) install Python3
+2) install virtualenv
+3) in a suitable directory, run:
+    git clone https://github.com/tangentmonger/twitterknitter.git
+4) cd to the newly created twitterknitter directory
+5) find out where your Python3 executable is by running:
+    which python3
+6) create a virtual environment by running:
+    virtualenv -p <path-to-python3> venv
+7) activate the virtual environment by running:
+    source venv/bin/activate
+    (your prompt should change)
+8) install the required Python libraries into the virtual environment by running:
+    pip install -r requirements.txt
+9) run the twitterknitter:
+    python python/twitterknitter.py
+
+
+Optional steps if you want to knit tweets:
+10) edit python/secrets.py and fill in the API keys from the TOG wiki (https://wiki.tog.ie/index.php/Knitting_machine_contraption#Twitter_authorisation_details)
+11) edit python/twitterknitter, near the bottom:
+    uncomment line: text = choose_tweet()
+    comment out line: text = input("Enter text")
+
+
+To exit the virtual environment afterwards, run:
+    deactivate
+
