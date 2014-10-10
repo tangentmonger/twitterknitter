@@ -15,13 +15,15 @@ Installing the Python client
     (your prompt should change)
 8) install the required Python libraries into the virtual environment by running:
     pip install -r requirements.txt
+9) change directory:
+    cd python
 9) run the twitterknitter:
-    python python/twitterknitter.py
+    python twitterknitter.py
 
 
 Optional steps if you want to knit tweets:
 10) edit python/secrets.py and fill in the API keys from the TOG wiki (https://wiki.tog.ie/index.php/Knitting_machine_contraption#Twitter_authorisation_details)
-11) edit python/twitterknitter, near the bottom:
+11) edit python/twitterknitter.py, near the bottom:
     uncomment line: text = choose_tweet()
     comment out line: text = input("Enter text")
 
