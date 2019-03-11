@@ -10,7 +10,7 @@ class Pattern24:
         if image.mode != '1':
             raise ValueError("Image must be black and white only")
         if image.size[0] is not 24:
-            raise ValueError("Image must be exactly 24 pixels wide")
+            raise ValueError("Image must be exactly 24 pixels wide, it is " + str(image.size[0]) )
         raw_data = list(image.getdata())
         colors = [x[1] for x in image.getcolors()]
         bw_data = cls._convert_to_bw(raw_data, colors)
